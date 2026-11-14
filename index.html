@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Diagnóstico de tu negocio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root { --carbon:#141414; --crema:#F5F1E8; --naranja:#FF6B2C; --azul:#1E5F74; --linea:#d9d3c5; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--crema); color: var(--carbon); font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 17px; line-height: 1.5; }
+.app { max-width: 680px; margin: 0 auto; min-height: 100dvh; display: flex; flex-direction: column; padding: 20px 20px 28px; }
+
+/* Encabezado: la línea que va del caos (carbón) al orden (naranja) */
+header { position: sticky; top: 0; background: var(--crema); padding: 4px 0 14px; z-index: 2; }
+.etq { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--azul); font-weight: 700; }
+.fila { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.avance { height: 4px; background: var(--carbon); border-radius: 4px; margin-top: 10px; overflow: hidden; }
+.avance i { display: block; height: 100%; width: 0; background: var(--naranja); border-radius: 4px; transition: width .35s ease; }
+.estado { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .08em; color: #6b665c; }
+
+main { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 18px 0; }
+h1 { font-weight: 800; font-size: clamp(26px, 6.2vw, 38px); line-height: 1.16; letter-spacing: -.02em; margin: 10px 0 14px; text-wrap: balance; }
+.intro h1 { font-size: clamp(34px, 8.5vw, 52px); }
+.res { background: var(--naranja); color: var(--carbon); padding: 0 .22em; display: inline-block; transform: rotate(-2deg); border-radius: 7px 4px 8px 3px / 4px 8px 3px 7px; }
+.ayuda { color: #55514a; margin: 0 0 18px; font-size: 15.5px; }
+.intro p { font-size: 18px; color: #3a3833; max-width: 34em; }
+
+textarea, input[type=text] { width: 100%; font: inherit; color: var(--carbon); background: #fffdf8; border: 2px solid var(--carbon); border-radius: 14px; padding: 14px 16px; outline: none; }
+textarea { min-height: 150px; resize: vertical; }
+textarea:focus, input[type=text]:focus { border-color: var(--naranja); }
+
+.voz { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.mic { width: 58px; height: 58px; flex: none; border-radius: 50%; border: 2px solid var(--carbon); background: var(--naranja); color: var(--carbon); cursor: pointer; display: grid; place-items: center; }
+.mic svg { width: 26px; height: 26px; }
+.mic.on { background: var(--carbon); color: var(--naranja); animation: pulso 1.2s infinite; }
+@keyframes pulso { 50% { box-shadow: 0 0 0 9px rgba(255,107,44,.28); } }
+.voz span { font-size: 14.5px; color: #55514a; }
+
+.ops { display: grid; gap: 10px; }
+.op { text-align: left; font: inherit; font-weight: 600; color: var(--carbon); background: #fffdf8; border: 2px solid var(--carbon); border-radius: 14px; padding: 14px 16px; cursor: pointer; display: flex; gap: 12px; align-items: center; }
+.op::before { content: ''; width: 18px; height: 18px; flex: none; border: 2px solid var(--carbon); border-radius: 50%; }
+.multi .op::before { border-radius: 5px; }
+.op.sel { background: var(--naranja); }
+.op.sel::before { background: var(--carbon); }
+.otro { margin-top: 10px; }
+
+footer { display: flex; gap: 10px; align-items: center; padding-top: 8px; }
+.btn { font: inherit; font-weight: 800; border-radius: 14px; padding: 15px 22px; cursor: pointer; border: 2px solid var(--carbon); background: var(--carbon); color: var(--crema); }
+.btn.sec { background: transparent; color: var(--carbon); }
+.btn.acc { background: var(--naranja); color: var(--carbon); }
+.btn.txt { border-color: transparent; background: transparent; color: #55514a; font-weight: 600; padding: 15px 8px; }
+.btn:disabled { opacity: .35; cursor: default; }
+.sp { flex: 1; }
+
+.lista { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin: 6px 0 18px; }
+.item { background: #fffdf8; border: 2px solid var(--linea); border-radius: 12px; padding: 12px 14px; cursor: pointer; text-align: left; font: inherit; color: inherit; width: 100%; }
+.item b { display: block; font-weight: 600; font-size: 15px; }
+.item small { color: #55514a; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item.vacio small { color: var(--azul); }
+h2 { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--azul); margin: 18px 0 8px; }
+select { font: inherit; width: 100%; padding: 13px 14px; border: 2px solid var(--carbon); border-radius: 14px; background: #fffdf8; margin: 10px 0; }
+.acciones { display: grid; gap: 10px; margin-top: 18px; }
+button:focus-visible, .item:focus-visible { outline: 3px solid var(--azul); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="fila"><span class="etq" id="etq">Diagnóstico</span><span class="estado" id="estado"></span></div>
+    <div class="avance"><i id="barra"></i></div>
+  </header>
+  <main id="main"></main>
+  <footer id="pie"></footer>
+</div>
+<script src="config.js"></script>
+<script src="preguntas.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
