@@ -143,7 +143,17 @@ function pintar() {
     else { campo = document.createElement('input'); campo.type = q.entrada || 'text'; campo.value = S.r[q.id] || ''; m.append(campo); campo.onkeydown = e => { if (e.key === 'Enter' && !sig.disabled) sig.click(); }; }
     const act = () => { const t = campo.value.trim(); sig.disabled = !t || !!(q.valida && !q.valida.test(t)); };
     campo.addEventListener('input', act); act();
-    sig.onclick = () => { pararVoz(); guardar(q, campo.value.trim()); ir(1); };
+    let avisado = false;
+    sig.onclick = () => {
+      pararVoz(); const t = campo.value.trim();
+      if (q.tipo === 'texto' && !avisado && t.split(/\s+/).length < 5 && !/^(no|ninguna|ninguno|nada|no aplica)\.?$/i.test(t)) {
+        avisado = true;
+        const aviso = document.createElement('p'); aviso.className = 'ayuda'; aviso.style.cssText = 'margin-top:12px;font-weight:600;color:#1E5F74';
+        aviso.textContent = '¿Me cuentas un poco más? Con un ejemplo o el paso a paso el diagnóstico sale mucho mejor. Si no hay más que decir, toca Continuar otra vez.';
+        m.append(aviso); campo.focus(); return;
+      }
+      guardar(q, t); ir(1);
+    };
     if (q.tipo === 'corto') campo.focus();
   } else {
     const multi = q.tipo === 'multi';
