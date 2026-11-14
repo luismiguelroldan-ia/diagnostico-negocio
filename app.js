@@ -126,15 +126,22 @@ function pintar() {
     m.innerHTML = `<span class="etq">${q.n} · ${esc(q.area)}</span><h1>${marca(q.titulo)}</h1><p>${esc(q.texto)}</p>`;
     return pie(atras, espacio(), boton(i === 0 ? 'Empezar' : 'Continuar', 'acc', () => ir(1)));
   }
+  if (q.tipo === 'permiso') {
+    m.innerHTML = `<h1>${marca(q.p)}</h1>${q.texto.map(t => `<p class="ayuda">${esc(t)}</p>`).join('')}<div class="ops multi"><button type="button" class="op${S.r[q.id] ? ' sel' : ''}">${esc(q.acepto)}</button></div>`;
+    const ok = boton('Continuar', '', () => { if (!S.r[q.id]) guardar(q, 'Autorizó · ' + new Date().toLocaleString('es-CO')); ir(1); });
+    ok.disabled = !S.r[q.id];
+    m.querySelector('.op').onclick = e => { if (S.r[q.id]) return; ok.disabled = !e.currentTarget.classList.toggle('sel'); };
+    return pie(atras, espacio(), volver, ok);
+  }
   m.innerHTML = `<h1>${marca(q.p)}</h1>${q.ayuda ? `<p class="ayuda">${esc(q.ayuda)}</p>` : ''}`;
   const sig = boton('Continuar', '', () => ir(1));
-  const saltar = boton('Saltar', 'txt', () => ir(1));
+  const saltar = q.obligatoria ? null : boton('Saltar', 'txt', () => ir(1));
 
   if (q.tipo === 'texto' || q.tipo === 'corto') {
     let campo;
     if (q.tipo === 'texto') { const c = campoVoz(S.r[q.id], () => q.id); m.append(c.nodo); campo = c.area; }
-    else { campo = document.createElement('input'); campo.type = 'text'; campo.value = S.r[q.id] || ''; m.append(campo); campo.onkeydown = e => { if (e.key === 'Enter' && campo.value.trim()) sig.click(); }; }
-    const act = () => { sig.disabled = !campo.value.trim(); };
+    else { campo = document.createElement('input'); campo.type = q.entrada || 'text'; campo.value = S.r[q.id] || ''; m.append(campo); campo.onkeydown = e => { if (e.key === 'Enter' && !sig.disabled) sig.click(); }; }
+    const act = () => { const t = campo.value.trim(); sig.disabled = !t || !!(q.valida && !q.valida.test(t)); };
     campo.addEventListener('input', act); act();
     sig.onclick = () => { pararVoz(); guardar(q, campo.value.trim()); ir(1); };
     if (q.tipo === 'corto') campo.focus();
@@ -155,7 +162,7 @@ function pintar() {
     m.append(caja);
     let otro, act = () => {};
     if (multi) {
-      otro = document.createElement('input'); otro.type = 'text'; otro.className = 'otro'; otro.placeholder = 'Otro: escríbelo aquí'; otro.value = otroPrevio; m.append(otro);
+      otro = document.createElement('input'); otro.type = 'text'; otro.className = 'otro campo-otro'; otro.placeholder = 'Otro: escríbelo aquí'; otro.value = otroPrevio; m.append(otro);
       act = () => { sig.disabled = !sel.length && !otro.value.trim(); };
       otro.oninput = act; act();
       sig.onclick = () => { guardar(q, sel.concat(otro.value.trim() ? [otro.value.trim()] : [])); ir(1); };
@@ -172,7 +179,7 @@ function terminar() {
 
 function pantallaFinal() {
   const m = $('#main'); m.className = ''; $('#barra').style.width = '100%'; $('#etq').textContent = 'Resumen';
-  const v = visibles().filter(q => q.tipo !== 'intro'), faltan = v.filter(q => vacia(S.r[q.id])).length;
+  const v = visibles().filter(q => q.tipo !== 'intro' && q.tipo !== 'permiso'), faltan = v.filter(q => vacia(S.r[q.id])).length;
   m.innerHTML = `<h1>Listo. Ya tengo el {mapa} de tu negocio`.replace(/\{(.+?)\}/, '<span class="res">$1</span>') + `</h1>
     <p class="ayuda">${faltan ? `Quedaron ${faltan} preguntas sin responder (están marcadas abajo). ` : ''}Puedes corregir cualquier respuesta o agregar un proceso que no haya salido. Este enlace te sirve para volver cuando quieras.</p>
     <div class="acciones"><button class="btn acc" id="mas">Agregar un proceso que faltó</button></div>

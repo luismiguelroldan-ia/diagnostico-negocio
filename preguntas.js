@@ -11,7 +11,18 @@ const PREGUNTAS = [
   { id: 'i0', area: 'Tu negocio', tipo: 'intro', n: '00',
     titulo: 'Vamos a entender {tu negocio}',
     texto: 'Son unos 30 minutos. No hay respuestas buenas ni malas: cuéntalo como se lo contarías a un amigo. Puedes hablar en vez de escribir, y salir y volver cuando quieras: todo queda guardado.' },
-  { id: 'n1', area: 'Tu negocio', tipo: 'corto', p: '¿Cómo se llama {tu negocio}?', busca: 'identificación' },
+  { id: 'aut', area: 'Tu negocio', tipo: 'permiso', p: 'Antes de empezar, necesito tu {permiso}',
+    texto: [
+      'Lo que respondas se usa solo para dos cosas: preparar el diagnóstico de tu negocio y contactarte para entregártelo y contarte cómo te podemos ayudar.',
+      'No se comparte ni se vende a nadie. No te voy a pedir contraseñas ni datos de cuentas bancarias.',
+      'Puedes pedir en cualquier momento que te mostremos, corrijamos o borremos tu información, escribiendo a quien te envió este enlace (Ley 1581 de 2012).' ],
+    acepto: 'Sí, autorizo el uso de mis datos para esto', busca: 'autorización de tratamiento de datos (queda con fecha y hora)' },
+  { id: 'n1', area: 'Tu negocio', tipo: 'corto', obligatoria: true, p: '¿Cómo se llama {tu negocio}?', busca: 'identificación' },
+  { id: 'k1', area: 'Tu negocio', tipo: 'corto', obligatoria: true, p: '¿Cuál es {tu nombre}?', busca: 'persona de contacto' },
+  { id: 'k2', area: 'Tu negocio', tipo: 'corto', obligatoria: true, entrada: 'tel', valida: /^[0-9 +()-]{7,20}$/, p: '¿A qué {celular} te escribimos?',
+    ayuda: 'Para enviarte el diagnóstico por WhatsApp.', busca: 'contacto comercial' },
+  { id: 'k3', area: 'Tu negocio', tipo: 'corto', entrada: 'email', valida: /^[^ @]+@[^ @]+[.][^ @]+$/, p: '¿Cuál es tu {correo}?',
+    ayuda: 'Si no usas correo, toca Saltar.', busca: 'contacto comercial' },
   { id: 'n2', area: 'Tu negocio', tipo: 'texto', p: '¿Qué vendes y {a quién}?',
     ayuda: 'Ejemplo: "Vendemos repuestos de moto a talleres y a personas del barrio".', busca: 'modelo de negocio, tipo de cliente' },
   { id: 'n3', area: 'Tu negocio', tipo: 'opcion', p: '¿Hace cuánto {funciona} el negocio?',
@@ -46,6 +57,14 @@ const PREGUNTAS = [
     op: ['Sí, lo tengo claro', 'Más o menos', 'Ni idea'], si: r => (r.m3 || '').startsWith('Sí'), busca: 'medición de marketing' },
   { id: 'm5', area: 'Clientes nuevos', tipo: 'texto', p: 'Cuando alguien ya te compró, ¿lo vuelves a {buscar}?',
     ayuda: 'Por ejemplo: avisarle de promociones, recordarle que ya le toca, felicitarlo en su cumpleaños. Cuéntame qué haces hoy, así sea nada.', busca: 'recompra, fidelización, uso de base de clientes' },
+
+  { id: 'b1', area: 'Clientes nuevos', tipo: 'opcion', p: '¿Tu negocio tiene {manual de marca}?',
+    ayuda: 'Es un documento que dice cómo se ve y cómo habla tu marca: logo, colores, letras y forma de escribir.',
+    op: ['Sí, completo', 'Tengo algunas cosas, pero no un documento', 'No tengo', 'No sé qué es'], busca: 'madurez de marca: oportunidad de crear o completar el manual' },
+  { id: 'b2', area: 'Clientes nuevos', tipo: 'multi', p: '¿Qué tiene {hoy} tu marca?',
+    ayuda: 'Marca lo que ya tengas definido.',
+    op: ['Logo', 'Colores definidos', 'Tipos de letra definidos', 'Una forma de hablar o escribir', 'Frase o eslogan', 'Plantillas para redes', 'Estilo definido para fotos y videos', 'Nada todavía'],
+    si: r => r.b1 && r.b1 !== 'No sé qué es', busca: 'qué trae el manual y qué falta' },
 
   // ───────────── 02 · VENTAS ─────────────
   { id: 'i2', area: 'Ventas', tipo: 'intro', n: '02',
@@ -143,12 +162,13 @@ const PREGUNTAS = [
     busca: 'dependencia del dueño, puntos únicos de falla' },
   { id: 'c4', area: 'Lo que más pesa', tipo: 'texto', p: '¿Ya intentaste arreglar algo con un programa o herramienta y {no funcionó}?',
     ayuda: 'Cuéntame qué fue y por qué crees que no sirvió.', busca: 'intentos fallidos, resistencias del equipo' },
-  { id: 'c5', area: 'Lo que más pesa', tipo: 'texto', p: 'Si pudieras arreglar {una sola cosa} mañana, ¿cuál sería?',
+  { id: 'c5', area: 'Lo que más pesa', tipo: 'texto', p: 'Si pudieras mejorar {una sola} tarea o proceso de tu negocio, ¿cuál sería y por qué?',
+    ayuda: 'Puede ser algo que te quita tiempo, que sale mal seguido o que sientes que te frena.',
     busca: 'prioridad declarada (contrastar con la raíz detectada)' },
   { id: 'c6', area: 'Lo que más pesa', tipo: 'texto', p: '¿Cómo te gustaría ver el negocio en {6 meses}?',
     busca: 'meta, criterio de éxito del plan' },
-  { id: 'c7', area: 'Lo que más pesa', tipo: 'texto', p: '¿Hay algo importante que {no te pregunté}?',
-    ayuda: 'Cualquier proceso, problema o idea que no haya salido.', busca: 'vacíos del cuestionario' },
+  { id: 'c7', area: 'Lo que más pesa', tipo: 'texto', p: '¿Quieres {agregar} algo más?',
+    ayuda: 'Un problema, una molestia o una idea de tu negocio que no haya salido en las preguntas. Si no hay nada, dilo y terminamos.', busca: 'vacíos del cuestionario' },
 ];
 
 const AREAS_EXTRA = ['Clientes nuevos', 'Ventas', 'Entrega', 'Plata y papeles', 'Otro'];
