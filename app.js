@@ -3,7 +3,23 @@ const $ = s => document.querySelector(s);
 const GAS = !!(window.google && google.script && google.script.run); // true cuando el formulario vive dentro de Google
 const gas = (fn, arg) => new Promise((ok, mal) => google.script.run.withSuccessHandler(ok).withFailureHandler(mal)[fn](arg));
 const EN_LINEA = GAS || !!ENDPOINT;
-const CODIGO = (window.CODIGO_SERVIDOR || new URLSearchParams(location.search).get('c') || 'DEMO').replace(/[^A-Za-z0-9-]/g, '').slice(0, 40) || 'DEMO';
+// Cada persona tiene su propio código. Si el enlace no trae uno (?c=), se crea aquí, se recuerda en este
+// dispositivo y se deja en la dirección para que pueda volver al mismo formulario. El servidor lo registra solo.
+const CODIGO = (() => {
+  const limpio = t => String(t || '').toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 40);
+  const url = new URL(location.href);
+  let c = limpio(window.CODIGO_SERVIDOR || url.searchParams.get('c'));
+  if (c.length < 8) {
+    try { c = limpio(localStorage.getItem('diag_codigo')); } catch (e) { c = ''; }
+    if (c.length < 8) {
+      const letras = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', azar = crypto.getRandomValues(new Uint8Array(10));
+      c = Array.from(azar, n => letras[n % letras.length]).join('');
+    }
+    try { url.searchParams.set('c', c); history.replaceState(null, '', url); } catch (e) {}
+  }
+  try { localStorage.setItem('diag_codigo', c); } catch (e) {}
+  return c;
+})();
 const CLAVE = 'diag_' + CODIGO;
 const MIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
 
@@ -33,7 +49,7 @@ async function vaciarCola() {
     }
     $('#estado').textContent = 'GUARDADO';
   } catch (e) {
-    $('#estado').textContent = 'SIN CONEXIÓN · SE GUARDA AQUÍ';
+    $('#estado').textContent = e.message === 'codigo' ? 'NO SE ESTÁ GUARDANDO · AVISA A QUIEN TE ENVIÓ EL ENLACE' : 'SIN CONEXIÓN · SE GUARDA AQUÍ';
     setTimeout(vaciarCola, 15000);
   }
   enviando = false;
